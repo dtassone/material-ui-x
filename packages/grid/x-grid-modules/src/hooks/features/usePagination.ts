@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useReducer, useRef } from 'react';
+import * as React from 'react';
 import { useLogger } from '../utils';
 import {
   PAGE_CHANGED_EVENT,
@@ -59,10 +59,10 @@ export const usePagination = (
     page: 1,
     pageCount: getPageCount(options.paginationPageSize, rows.length),
   };
-  const stateRef = useRef(initialState);
-  const [state, dispatch] = useReducer(paginationReducer, initialState);
+  const stateRef = React.useRef(initialState);
+  const [state, dispatch] = React.useReducer(paginationReducer, initialState);
 
-  const updateState = useCallback(
+  const updateState = React.useCallback(
     (stateUpdate: Partial<PaginationState>) => {
       const newState = { ...stateRef.current, ...stateUpdate };
       stateRef.current = newState;
@@ -71,7 +71,7 @@ export const usePagination = (
     [dispatch],
   );
 
-  const setPage = useCallback(
+  const setPage = React.useCallback(
     (page: number) => {
       if (apiRef && apiRef.current) {
         apiRef.current!.renderPage(page);
@@ -89,7 +89,7 @@ export const usePagination = (
   );
 
   // We use stateRef in this method to avoid reattaching this method to the api every time the state changes
-  const setPageSize = useCallback(
+  const setPageSize = React.useCallback(
     (pageSize: number) => {
       if (stateRef.current.pageSize === pageSize) {
         return;
@@ -118,25 +118,25 @@ export const usePagination = (
     [stateRef, apiRef, setPage, updateState, logger],
   );
 
-  const onPageChanged = useCallback(
+  const onPageChanged = React.useCallback(
     (handler: (param: PageChangedParams) => void): (() => void) => {
       return apiRef!.current!.registerEvent(PAGE_CHANGED_EVENT, handler);
     },
     [apiRef],
   );
-  const onPageSizeChanged = useCallback(
+  const onPageSizeChanged = React.useCallback(
     (handler: (param: PageChangedParams) => void): (() => void) => {
       return apiRef!.current!.registerEvent(PAGESIZE_CHANGED_EVENT, handler);
     },
     [apiRef],
   );
 
-  const getAutoPageSize = useCallback(() => {
+  const getAutoPageSize = React.useCallback(() => {
     const containerProps = apiRef?.current?.getContainerPropsState();
     return containerProps?.viewportPageSize;
   }, [apiRef]);
 
-  const resetAutopageSize = useCallback(() => {
+  const resetAutopageSize = React.useCallback(() => {
     const autoPagesize = getAutoPageSize();
     if (autoPagesize) {
       logger.debug(`Setting autoPagesize to ${autoPagesize}`);
@@ -144,11 +144,11 @@ export const usePagination = (
     }
   }, [setPageSize, logger, getAutoPageSize]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     stateRef.current = state;
   }, [state]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (rows.length !== state.rowCount) {
       logger.info(`Options or rows changed, recalculating pageCount and rowCount`);
       const newPageCount = getPageCount(state.pageSize, rows.length);
@@ -160,7 +160,7 @@ export const usePagination = (
     }
   }, [rows.length, logger, updateState, state.rowCount, state.pageSize, setPage, state.page]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (
       !options.paginationAutoPageSize &&
       options.paginationPageSize &&
@@ -170,7 +170,7 @@ export const usePagination = (
     }
   }, [options.paginationAutoPageSize, options.paginationPageSize, logger, setPageSize]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (options.paginationAutoPageSize && columns.visible.length > 0) {
       resetAutopageSize();
     }
@@ -179,7 +179,7 @@ export const usePagination = (
   useApiEventHandler(apiRef, PAGE_CHANGED_EVENT, options.onPageChanged);
   useApiEventHandler(apiRef, PAGESIZE_CHANGED_EVENT, options.onPageSizeChanged);
 
-  const onResize = useCallback(() => {
+  const onResize = React.useCallback(() => {
     if (options.paginationAutoPageSize) {
       resetAutopageSize();
     }
