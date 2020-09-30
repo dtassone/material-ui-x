@@ -8,6 +8,7 @@ import { classnames } from '../utils';
 import { ColumnHeaderSortIcon } from './column-header-sort-icon';
 import { ColumnHeaderTitle } from './column-header-title';
 import { ColumnHeaderSeparator } from './column-header-separator';
+import { ColumnHeaderFilterIcon } from './column-header-filter-icon';
 
 interface ColumnHeaderItemProps {
   colIndex: number;
@@ -32,6 +33,9 @@ export const ColumnHeaderItem = ({
 }: ColumnHeaderItemProps) => {
   const apiRef = React.useContext(ApiContext);
   const { disableColumnReorder, showColumnRightBorder, disableColumnResize } = options;
+    const isColumnSorted = column.sortDirection != null;
+    //todo refactor to a prop on col isNumeric or ?? ie: coltype===price wont work
+    const isColumnNumeric = column.type === 'number';
 
   let headerComponent: React.ReactElement | null = null;
   if (column.renderHeader) {
@@ -85,6 +89,8 @@ export const ColumnHeaderItem = ({
         {
           'MuiDataGrid-colCellSortable': column.sortable,
           'MuiDataGrid-colCellMoving': isDragging,
+          'MuiDataGrid-colCellSorted': isColumnSorted ,
+          'MuiDataGrid-colCellNumeric': isColumnNumeric ,
         },
       )}
       key={column.field}
@@ -100,26 +106,33 @@ export const ColumnHeaderItem = ({
       {...ariaSort}
     >
       <div className="MuiDataGrid-colCell-draggable" {...dragConfig}>
-        {column.type === 'number' && (
-          <ColumnHeaderSortIcon
-            direction={sortDirection}
-            index={sortIndex}
-            hide={column.hideSortIcons}
-          />
-        )}
-        {headerComponent || (
-          <ColumnHeaderTitle
-            label={column.headerName || column.field}
-            description={column.description}
-            columnWidth={width}
-          />
-        )}
-        {column.type !== 'number' && (
-          <ColumnHeaderSortIcon
-            direction={sortDirection}
-            index={sortIndex}
-            hide={column.hideSortIcons}
-          />
+        {isColumnNumeric && <ColumnHeaderFilterIcon column={column} />}
+
+        <div className={'MuiDataGrid-colCellTitleContainer'}>
+          {isColumnNumeric && (
+            <ColumnHeaderSortIcon
+              direction={sortDirection}
+              index={sortIndex}
+              hide={column.hideSortIcons}
+            />
+          )}
+          {headerComponent || (
+            <ColumnHeaderTitle
+              label={column.headerName || column.field}
+              description={column.description}
+              columnWidth={width}
+            />
+          )}
+        </div>
+        {!isColumnNumeric && (
+          <>
+            <ColumnHeaderSortIcon
+              direction={sortDirection}
+              index={sortIndex}
+              hide={column.hideSortIcons}
+            />
+            <ColumnHeaderFilterIcon column={column} />
+          </>
         )}
       </div>
       <ColumnHeaderSeparator
