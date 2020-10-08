@@ -209,10 +209,12 @@ export const useVirtualRows = (
       realScrollRef.current = { left: event.target.scrollLeft, top: event.target.scrollTop };
       if (scrollingTimeout.current === 0) {
         apiRef.current.publishEvent(SCROLLING_START);
+        apiRef.current.state.isScrolling = true;
       }
       clearTimeout(scrollingTimeout.current);
       scrollingTimeout.current = setTimeout(() => {
         scrollingTimeout.current = 0;
+        apiRef.current.state.isScrolling = false;
         apiRef.current.publishEvent(SCROLLING_STOP);
       }, 300);
       updateViewport();
