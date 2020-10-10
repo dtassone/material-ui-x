@@ -41,7 +41,7 @@ export const useVirtualRows = (
 ): UseVirtualRowsReturnType => {
   const logger = useLogger('useVirtualRows');
   const pageRef = React.useRef<number>(0);
-  const rowsCount = React.useRef<number>(rows.length);
+  const virtualRowsCount = React.useRef<number>(rows.length);
   const paginationCurrentPage = React.useRef<number>(1);
   const containerPropsRef = React.useRef<ContainerProps | null>(null);
   const optionsRef = React.useRef<GridOptions>(options);
@@ -73,7 +73,7 @@ export const useVirtualRows = (
 
       const firstRowIdx = page * containerProps.viewportPageSize + minRowIdx;
       let lastRowIdx = firstRowIdx + containerProps.renderingZonePageSize;
-      const maxIndex = rowsCount.current + minRowIdx;
+      const maxIndex = virtualRowsCount.current + minRowIdx;
       if (lastRowIdx > maxIndex) {
         lastRowIdx = maxIndex;
       }
@@ -174,7 +174,7 @@ export const useVirtualRows = (
 
   const updateContainerSize = React.useCallback(() => {
     if (columnTotalWidthRef.current > 0) {
-      const totalRowsCount = apiRef?.current?.getRowsCount() || 0; // we ensure we call with latest length
+      const totalRowsCount = apiRef?.current?.state?.rows.totalRowCount; // we ensure we call with latest length
       const currentPage = paginationCurrentPage.current;
       let pageRowCount =
         optionsRef.current.pagination && optionsRef.current.pageSize
@@ -186,15 +186,15 @@ export const useVirtualRows = (
           ? pageRowCount
           : totalRowsCount - (currentPage - 1) * pageRowCount;
 
-      rowsCount.current =
+      virtualRowsCount.current =
         pageRowCount == null || pageRowCount > totalRowsCount ? totalRowsCount : pageRowCount;
       containerPropsRef.current = getContainerProps(
         optionsRef.current,
         columnTotalWidthRef.current,
-        rowsCount.current,
+        virtualRowsCount.current,
       );
       if (optionsRef.current.autoPageSize && containerPropsRef.current) {
-        rowsCount.current = containerPropsRef.current.viewportPageSize;
+        virtualRowsCount.current = containerPropsRef.current.viewportPageSize;
       }
       updateViewport();
       reRender();
@@ -208,14 +208,14 @@ export const useVirtualRows = (
     (event: any) => {
       realScrollRef.current = { left: event.target.scrollLeft, top: event.target.scrollTop };
       if (scrollingTimeout.current === 0) {
-        apiRef.current.publishEvent(SCROLLING_START);
+        // apiRef.current.publishEvent(SCROLLING_START);
         apiRef.current.state.isScrolling = true;
       }
       clearTimeout(scrollingTimeout.current);
       scrollingTimeout.current = setTimeout(() => {
         scrollingTimeout.current = 0;
         apiRef.current.state.isScrolling = false;
-        apiRef.current.publishEvent(SCROLLING_STOP);
+        // apiRef.current.publishEvent(SCROLLING_STOP);
       }, 300);
       updateViewport();
     },
@@ -357,7 +357,7 @@ export const useVirtualRows = (
   }, [options, renderingZoneRef, resetScroll, updateContainerSize, logger]);
 
   React.useEffect(() => {
-    if (rows.length !== rowsCount.current) {
+    if (rows.length !== virtualRowsCount.current) {
       logger.debug('Row length change to ', rows.length);
       updateContainerSize();
     }
