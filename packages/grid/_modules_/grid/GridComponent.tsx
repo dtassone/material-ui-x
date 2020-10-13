@@ -34,7 +34,7 @@ import { useOptionsProp } from './hooks/utils/useOptionsProp';
 import {useResizeContainer} from "./hooks/utils/useResizeContainer";
 import {useErrorHandler} from "./hooks/utils/useErrorHandler";
 import {getCurryTotalHeight} from "./utils/getTotalHeight";
-import {useRowsReducer} from "./hooks/features/core/useRowsReducer";
+import {useRowsReducer} from "./hooks/features/rows/useRowsReducer";
 
 /**
  * Data Grid component implementing [[GridComponentProps]].
@@ -83,7 +83,7 @@ export const GridComponent = React.forwardRef<HTMLDivElement, GridComponentProps
   );
 
   const onResizeColumn = useColumnResize(columnsHeaderRef, apiRef, internalOptions.headerHeight);
-  const paginationProps = usePagination(internalRows, internalColumns, apiRef);
+  const paginationProps = usePagination(internalColumns, apiRef);
 
   const customComponents = useComponents(
     internalColumns,
@@ -161,8 +161,6 @@ export const GridComponent = React.forwardRef<HTMLDivElement, GridComponentProps
                         <RenderContext.Provider value={renderCtx}>
                           <Viewport
                             ref={renderingZoneRef}
-                            options={internalOptions}
-                            rows={internalRows}
                             visibleColumns={internalColumns.visible}
                           />
                         </RenderContext.Provider>
