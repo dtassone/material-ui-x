@@ -54,7 +54,7 @@ export const RowCells: React.FC<RowCellsProps> = React.memo((props) => {
       colDef: column,
       rowIndex,
       value,
-      api: api!.current!,
+      api: api!.current,
     });
 
     if (column.valueGetter) {

@@ -1,9 +1,9 @@
 import * as React from 'react';
-import { ElementSize } from '../../models';
+import { ApiRef, ElementSize } from '../../models';
 import { debounce } from '../../utils';
 import { useLogger } from './useLogger';
 
-export function useResizeContainer(apiRef): (size: ElementSize) => void {
+export function useResizeContainer(apiRef: ApiRef): (size: ElementSize) => void {
   const gridLogger = useLogger('useResizeContainer');
 
   const onResize = React.useCallback(
@@ -34,7 +34,7 @@ export function useResizeContainer(apiRef): (size: ElementSize) => void {
       }
 
       gridLogger.info('resized...', size);
-      setImmediate(() => apiRef!.current.resize());
+      setImmediate(() => apiRef!.current.instance.resize(size));
     },
     [gridLogger, apiRef],
   );

@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useGridApi } from '../features/core/useGridApi';
 import { useLogger } from '../utils/useLogger';
 import {
   GRID_FOCUS_OUT,
@@ -49,7 +50,7 @@ export const useKeyboard = (options: GridOptions, initialised: boolean, apiRef: 
 
   const onMultipleKeyChange = React.useCallback(
     (isPressed: boolean) => {
-      apiRef.current.publishEvent(MULTIPLE_KEY_PRESS_CHANGED, isPressed);
+      apiRef.current.instance.publishEvent(MULTIPLE_KEY_PRESS_CHANGED, isPressed);
     },
     [apiRef],
   );
@@ -65,11 +66,11 @@ export const useKeyboard = (options: GridOptions, initialised: boolean, apiRef: 
       const root = findGridRootFromCurrent(cellEl)!;
       const currentColIndex = Number(cellEl.getAttribute('aria-colindex'));
       const currentRowIndex = Number(cellEl.getAttribute('data-rowindex'));
-      const autoPageSize = apiRef.current.getContainerPropsState()!.viewportPageSize;
+      const autoPageSize = apiRef.current.instance.getContainerPropsState()!.viewportPageSize;
       const pageSize =
         options.pagination && options.pageSize != null ? options.pageSize : autoPageSize;
-      const rowCount = options.pagination ? pageSize : apiRef.current.getRowsCount();
-      const colCount = apiRef.current.getVisibleColumns().length;
+      const rowCount = options.pagination ? pageSize : apiRef.current.instance.getRowsCount();
+      const colCount = apiRef.current.instance.getVisibleColumns().length;
 
       let nextCellIndexes: CellIndexCoordinates;
       if (isArrowKeys(code)) {
@@ -108,7 +109,7 @@ export const useKeyboard = (options: GridOptions, initialised: boolean, apiRef: 
         cancelAnimationFrame(rafFocusOnCellRef.current);
       }
 
-      apiRef.current.once(SCROLLING, () => {
+      apiRef.current.instance.once(SCROLLING, () => {
         rafFocusOnCellRef.current = requestAnimationFrame(() => {
           const nextCell = getCellElementFromIndexes(root, nextCellIndexes);
 
@@ -122,7 +123,7 @@ export const useKeyboard = (options: GridOptions, initialised: boolean, apiRef: 
         });
       });
 
-      apiRef.current.scrollToIndexes(nextCellIndexes);
+      apiRef.current.instance.scrollToIndexes(nextCellIndexes);
 
       return nextCellIndexes;
     },
@@ -136,7 +137,7 @@ export const useKeyboard = (options: GridOptions, initialised: boolean, apiRef: 
     )! as HTMLElement;
 
     const rowId = getIdFromRowElem(rowEl);
-    apiRef.current.selectRow(rowId);
+    apiRef.current.instance.selectRow(rowId);
   }, [apiRef]);
 
   const expandSelection = React.useCallback(
@@ -148,10 +149,10 @@ export const useKeyboard = (options: GridOptions, initialised: boolean, apiRef: 
 
       const currentRowIndex = Number(rowEl.getAttribute('data-rowindex'));
       let selectionFromRowIndex = currentRowIndex;
-      const selectedRows = apiRef.current.getSelectedRows();
+      const selectedRows = apiRef.current.instance.getSelectedRows();
       if (selectedRows.length > 0) {
         const selectedRowsIndex = selectedRows.map((row) =>
-          apiRef.current.getRowIndexFromId(row.id),
+          apiRef.current.instance.getRowIndexFromId(row.id),
         );
 
         const diffWithCurrentIndex: number[] = selectedRowsIndex.map((idx) =>
@@ -169,13 +170,13 @@ export const useKeyboard = (options: GridOptions, initialised: boolean, apiRef: 
             ? selectionFromRowIndex
             : nextCellIndexes.rowIndex,
         )
-        .map((cur, idx) => apiRef.current.getRowIdFromRowIndex(cur + idx));
+        .map((cur, idx) => apiRef.current.instance.getRowIdFromRowIndex(cur + idx));
 
       logger.debug('Selecting rows ', rowIds);
 
-      apiRef.current.selectRows(rowIds, true, true);
+      apiRef.current.instance.selectRows(rowIds, true, true);
     },
-    [logger, apiRef, navigateCells],
+    [apiRef, navigateCells, logger],
   );
 
   const handleCopy = React.useCallback(() => {
@@ -184,7 +185,7 @@ export const useKeyboard = (options: GridOptions, initialised: boolean, apiRef: 
       ROW_CSS_CLASS,
     )! as HTMLElement;
     const rowId = getIdFromRowElem(rowEl);
-    const rowModel = apiRef.current.getRowFromId(rowId);
+    const rowModel = apiRef.current.instance.getRowFromId(rowId);
 
     if (rowModel.selected) {
       window?.getSelection()?.selectAllChildren(rowEl);
@@ -232,18 +233,10 @@ export const useKeyboard = (options: GridOptions, initialised: boolean, apiRef: 
       }
 
       if (event.key.toLowerCase() === 'a' && (event.ctrlKey || event.metaKey)) {
-        apiRef.current.selectRows(apiRef.current.getAllRowIds(), true);
+        apiRef.current.instance.selectRows(apiRef.current.instance.getAllRowIds(), true);
       }
     },
-    [
-      apiRef,
-      logger,
-      onMultipleKeyChange,
-      expandSelection,
-      handleCopy,
-      navigateCells,
-      selectActiveRow,
-    ],
+    [logger, onMultipleKeyChange, selectActiveRow, navigateCells, expandSelection, handleCopy, apiRef],
   );
 
   const onKeyUpHandler = React.useCallback(

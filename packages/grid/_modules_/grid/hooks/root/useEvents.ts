@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useGridApi } from '../features/core/useGridApi';
 import { useLogger } from '../utils/useLogger';
 import {
   CELL_CLICK,
@@ -47,7 +48,7 @@ export function useEvents(
   const logger = useLogger('useEvents');
 
   const getHandler = React.useCallback(
-    (name: string) => (...args: any[]) => apiRef.current.publishEvent(name, ...args),
+    (name: string) => (...args: any[]) => apiRef.current.instance.publishEvent(name, ...args),
     [apiRef],
   );
 
@@ -69,11 +70,11 @@ export function useEvents(
           return null;
         }
         const id = getIdFromRowElem(rowEl);
-        const rowModel = apiRef.current.getRowFromId(id);
-        const rowIndex = apiRef.current.getRowIndexFromId(id);
+        const rowModel = apiRef.current.instance.getRowFromId(id);
+        const rowIndex = apiRef.current.instance.getRowIndexFromId(id);
         const field = cellEl.getAttribute('data-field') as string;
         const value = cellEl.getAttribute('data-value');
-        const column = apiRef.current.getColumnFromField(field);
+        const column = apiRef.current.instance.getColumnFromField(field);
         if (!column || !column.disableClickEventBubbling) {
           const commonParams = {
             data: rowModel.data,
@@ -95,8 +96,8 @@ export function useEvents(
       } else if (isHeaderCell(elem) && !isResizingRef.current) {
         const headerCell = findParentElementFromClassName(elem, HEADER_CELL_CSS_CLASS)!;
         const field = getFieldFromHeaderElem(headerCell);
-        const column = apiRef.current.getColumnFromField(field);
-        const colIndex = apiRef.current.getColumnIndex(field);
+        const column = apiRef.current.instance.getColumnFromField(field);
+        const colIndex = apiRef.current.instance.getColumnIndex(field);
         const colHeaderParams: ColParams = {
           field,
           colDef: column,
@@ -119,16 +120,16 @@ export function useEvents(
       }
 
       if (eventParams.cell) {
-        apiRef.current.publishEvent(CELL_CLICK, eventParams.cell);
+        apiRef.current.instance.publishEvent(CELL_CLICK, eventParams.cell);
       }
       if (eventParams.row) {
-        apiRef.current.publishEvent(ROW_CLICK, eventParams.row);
+        apiRef.current.instance.publishEvent(ROW_CLICK, eventParams.row);
       }
       if (eventParams.header) {
-        apiRef.current.publishEvent(COLUMN_HEADER_CLICK, eventParams.header);
+        apiRef.current.instance.publishEvent(COLUMN_HEADER_CLICK, eventParams.header);
       }
     },
-    [apiRef, getEventParams],
+    [getEventParams, apiRef],
   );
 
   const onHoverHandler = React.useCallback(
@@ -140,23 +141,23 @@ export function useEvents(
       }
 
       if (eventParams.cell) {
-        apiRef.current.publishEvent(CELL_HOVER, eventParams.cell);
+        apiRef.current.instance.publishEvent(CELL_HOVER, eventParams.cell);
       }
       if (eventParams.row) {
-        apiRef.current.publishEvent(ROW_HOVER, eventParams.row);
+        apiRef.current.instance.publishEvent(ROW_HOVER, eventParams.row);
       }
       if (eventParams.header) {
-        apiRef.current.publishEvent(COLUMN_HEADER_HOVER, eventParams.header);
+        apiRef.current.instance.publishEvent(COLUMN_HEADER_HOVER, eventParams.header);
       }
     },
-    [apiRef, getEventParams],
+    [getEventParams, apiRef],
   );
 
   const onFocusOutHandler = React.useCallback(
     (event: FocusEvent) => {
-      apiRef.current.publishEvent(FOCUS_OUT, event);
+      apiRef.current.instance.publishEvent(FOCUS_OUT, event);
       if (event.relatedTarget === null) {
-        apiRef.current.publishEvent(GRID_FOCUS_OUT, event);
+        apiRef.current.instance.publishEvent(GRID_FOCUS_OUT, event);
       }
     },
     [apiRef],
@@ -164,13 +165,13 @@ export function useEvents(
 
   const onUnmount = React.useCallback(
     (handler: (param: any) => void): (() => void) => {
-      return apiRef.current.subscribeEvent(UNMOUNT, handler);
+      return apiRef.current.instance.subscribeEvent(UNMOUNT, handler);
     },
     [apiRef],
   );
   const onResize = React.useCallback(
     (handler: (param: any) => void): (() => void) => {
-      return apiRef.current.subscribeEvent(RESIZE, handler);
+      return apiRef.current.instance.subscribeEvent(RESIZE, handler);
     },
     [apiRef],
   );
@@ -183,7 +184,7 @@ export function useEvents(
     isResizingRef.current = false;
   }, []);
 
-  const resize = React.useCallback(() => apiRef.current.publishEvent(RESIZE), [apiRef]);
+  const resize = React.useCallback(() => apiRef.current.instance.publishEvent(RESIZE), [apiRef]);
   const eventsApi: EventsApi = { resize, onUnmount, onResize };
   useApiMethod(apiRef, eventsApi, 'EventsApi');
 
@@ -198,7 +199,7 @@ export function useEvents(
   useApiEventHandler(apiRef, COMPONENT_ERROR, options.onError);
 
   React.useEffect(() => {
-    if (gridRootRef && gridRootRef.current && apiRef.current?.isInitialised) {
+    if ( gridRootRef.current) {
       logger.debug('Binding events listeners');
       const keyDownHandler = getHandler(KEYDOWN);
       const keyUpHandler = getHandler(KEYUP);
@@ -212,7 +213,7 @@ export function useEvents(
       document.addEventListener(KEYUP, keyUpHandler);
 
       apiRef.current.isInitialised = true;
-      const api = apiRef.current;
+      const api = apiRef.current.instance;
 
       return () => {
         logger.debug('Clearing all events listeners');
@@ -226,14 +227,5 @@ export function useEvents(
       };
     }
     return undefined;
-  }, [
-    gridRootRef,
-    apiRef.current?.isInitialised,
-    getHandler,
-    logger,
-    onClickHandler,
-    onHoverHandler,
-    onFocusOutHandler,
-    apiRef,
-  ]);
+  }, [getHandler, logger, onClickHandler, onHoverHandler, onFocusOutHandler, apiRef, gridRootRef.current]);
 }

@@ -37,7 +37,7 @@ export const ColumnHeaderItem = React.memo(
     let headerComponent: React.ReactElement | null = null;
     if (column.renderHeader) {
       headerComponent = column.renderHeader({
-        api: api!.current!,
+        api: api!.current,
         colDef: column,
         colIndex,
         field: column.field,

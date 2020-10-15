@@ -33,7 +33,7 @@ export const useSelection = (
   const [, forceUpdate] = React.useState();
 
   const getSelectedRows = React.useCallback((): RowModel[] => {
-    return selectedItemsRef.current.map((id) => apiRef.current.getRowFromId(id));
+    return selectedItemsRef.current.map((id) => apiRef.current.instance.getRowFromId(id));
   }, [selectedItemsRef, apiRef]);
 
   const selectRowModel = React.useCallback(
@@ -44,7 +44,7 @@ export const useSelection = (
       }
 
       logger.debug(`Selecting row ${row.id}`);
-      const rowIndex = apiRef.current.getRowIndexFromId(row.id);
+      const rowIndex = apiRef.current.instance.getRowIndexFromId(row.id);
       // if checkboxSelection true then we allow click to deselect a row.
       let allowMultiSelect = allowMultipleSelectionKeyPressed.current || options.checkboxSelection;
       if (allowMultipleOverride) {
@@ -68,12 +68,12 @@ export const useSelection = (
         }
       } else {
         selectedItemsRef.current.forEach((id) => {
-          const otherSelectedRow = apiRef.current.getRowFromId(id);
+          const otherSelectedRow = apiRef.current.instance.getRowFromId(id);
           updatedRowModels.push({ ...otherSelectedRow, selected: false });
         });
         selectedItemsRef.current = [row.id];
       }
-      apiRef.current.updateRowModels([...updatedRowModels, { ...row, selected: isRowSelected }]);
+      apiRef.current.instance.updateRowModels([...updatedRowModels, { ...row, selected: isRowSelected }]);
 
       logger.info(
         `Row at index ${rowIndex} has change to ${isRowSelected ? 'selected' : 'unselected'} `,
@@ -86,8 +86,8 @@ export const useSelection = (
       const selectionChangeParam: SelectionChangeParams = {
         rows: getSelectedRows().map((r) => r.data),
       };
-      apiRef.current.publishEvent(ROW_SELECTED, rowSelectedParam);
-      apiRef.current.publishEvent(SELECTION_CHANGED, selectionChangeParam);
+      apiRef.current.instance.publishEvent(ROW_SELECTED, rowSelectedParam);
+      apiRef.current.instance.publishEvent(SELECTION_CHANGED, selectionChangeParam);
 
       forceUpdate((p: any) => !p);
     },
@@ -103,7 +103,7 @@ export const useSelection = (
 
   const selectRow = React.useCallback(
     (id: RowId, isSelected = true, allowMultiple = false) => {
-      selectRowModel(apiRef.current.getRowFromId(id), allowMultiple, isSelected);
+      selectRowModel(apiRef.current.instance.getRowFromId(id), allowMultiple, isSelected);
     },
     [apiRef, selectRowModel],
   );
@@ -123,7 +123,7 @@ export const useSelection = (
         updates = [...selectedItemsRef.current.map((id) => ({ id, selected: false })), ...updates];
       }
 
-      apiRef.current.updateRowModels(updates);
+      apiRef.current.instance.updateRowModels(updates);
       selectedItemsRef.current = isSelected ? ids : [];
       forceUpdate((p: any) => !p);
 
@@ -131,7 +131,7 @@ export const useSelection = (
       const selectionChangeParam: SelectionChangeParams = {
         rows: getSelectedRows().map((r) => r.data),
       };
-      apiRef.current.publishEvent(SELECTION_CHANGED, selectionChangeParam);
+      apiRef.current.instance.publishEvent(SELECTION_CHANGED, selectionChangeParam);
     },
     [apiRef, selectedItemsRef, getSelectedRows],
   );
@@ -154,13 +154,13 @@ export const useSelection = (
 
   const onRowSelected = React.useCallback(
     (handler: (param: RowSelectedParams) => void): (() => void) => {
-      return apiRef.current.subscribeEvent(ROW_SELECTED, handler);
+      return apiRef.current.instance.subscribeEvent(ROW_SELECTED, handler);
     },
     [apiRef],
   );
   const onSelectionChange = React.useCallback(
     (handler: (param: SelectionChangeParams) => void): (() => void) => {
-      return apiRef.current.subscribeEvent(SELECTION_CHANGED, handler);
+      return apiRef.current.instance.subscribeEvent(SELECTION_CHANGED, handler);
     },
     [apiRef],
   );
@@ -195,6 +195,6 @@ export const useSelection = (
   React.useEffect(() => {
     selectedItemsRef.current = [];
     const selectionChangeParam: SelectionChangeParams = { rows: [] };
-    apiRef.current.publishEvent(SELECTION_CHANGED, selectionChangeParam);
+    apiRef.current.instance.publishEvent(SELECTION_CHANGED, selectionChangeParam);
   }, [rowsProp, apiRef]);
 };

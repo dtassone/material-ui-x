@@ -23,8 +23,8 @@ export const ApiPreSelectedRows = () => {
 
   React.useEffect(() => {
     if (data.rows.length > 0) {
-      apiRef.current.selectRows([1, 3, 5]);
-      apiRef.current.selectRow(8, true, true);
+      apiRef.current.instance.selectRows([1, 3, 5]);
+      apiRef.current.instance.selectRow(8, true, true);
     }
   }, [data, apiRef]);
 

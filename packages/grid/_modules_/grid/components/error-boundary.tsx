@@ -22,7 +22,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, any> {
       this.logError(error);
 
       // Allows to trigger the Error event and all listener can run on Error
-      this.props.api.current.showError({ error, errorInfo });
+      this.props.api.current.instance.showError({ error, errorInfo });
     }
   }
 

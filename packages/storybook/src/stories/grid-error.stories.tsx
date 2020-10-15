@@ -124,7 +124,7 @@ export const ShowErrorApi = () => {
 
   React.useEffect(() => {
     if (api && api.current) {
-      api.current!.showError({ message: 'Error loading rows!' });
+      api.current!.instance.showError({ message: 'Error loading rows!' });
     }
   }, [api]);
 
@@ -162,7 +162,7 @@ export const CustomError = () => {
 
   React.useEffect(() => {
     if (api && api.current) {
-      api.current!.showError({ error: 'Something bad happened!', title: 'BIG ERROR' });
+      api.current!.instance.showError({ error: 'Something bad happened!', title: 'BIG ERROR' });
     }
   }, [api]);
 
@@ -218,7 +218,7 @@ export const AsyncErrorApi = () => {
 
   React.useEffect(() => {
     fetchError().catch((err) => {
-      api.current!.showError(err);
+      api.current!.instance.showError(err);
     });
   }, [api]);
 

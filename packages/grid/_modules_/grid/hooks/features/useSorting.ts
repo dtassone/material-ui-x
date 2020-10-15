@@ -43,7 +43,7 @@ export const useSorting = (
     (): SortModelParams => ({
       sortModel: sortModelRef.current,
       api: apiRef.current,
-      columns: apiRef.current.getAllColumns(),
+      columns: apiRef.current.instance.getAllColumns(),
     }),
     [apiRef],
   );
@@ -86,13 +86,13 @@ export const useSorting = (
             row2.data[field],
             buildCellParams({
               api: apiRef.current,
-              colDef: apiRef.current.getColumnFromField(field),
+              colDef: apiRef.current.instance.getColumnFromField(field),
               rowModel: row1,
               value: row1.data[field],
             }),
             buildCellParams({
               api: apiRef.current,
-              colDef: apiRef.current.getColumnFromField(field),
+              colDef: apiRef.current.instance.getColumnFromField(field),
               rowModel: row2,
               value: row2.data[field],
             }),
@@ -107,7 +107,7 @@ export const useSorting = (
   const buildComparatorList = React.useCallback(
     (sortModel: SortModel): FieldComparatorList => {
       const comparators = sortModel.map((item) => {
-        const column = apiRef.current.getColumnFromField(item.field);
+        const column = apiRef.current.instance.getColumnFromField(item.field);
         const comparator = isDesc(item.sort)
           ? (v1: CellValue, v2: CellValue, cellParams1: CellParams, cellParams2: CellParams) =>
               -1 * column.sortComparator!(v1, v2, cellParams1, cellParams2)
@@ -120,12 +120,12 @@ export const useSorting = (
   );
 
   const getOriginalOrderedRows: () => RowModel[] = React.useCallback(() => {
-    return originalOrder.current.map((rowId) => apiRef.current.getRowFromId(rowId));
+    return originalOrder.current.map((rowId) => apiRef.current.instance.getRowFromId(rowId));
   }, [apiRef]);
 
   const applySorting = React.useCallback(() => {
     logger.info('Sorting rows with ', sortModelRef.current);
-    const newRows = apiRef.current.getRowModels();
+    const newRows = apiRef.current.instance.getRowModels();
 
     let sorted = [...newRows];
     if (sortModelRef.current.length === 0) {
@@ -135,7 +135,7 @@ export const useSorting = (
       sorted = sorted.sort(comparatorListAggregate);
     }
 
-    apiRef.current.setRowModels([...sorted]);
+    apiRef.current.instance.setRowModels([...sorted]);
   }, [
     apiRef,
     sortModelRef,
@@ -148,7 +148,7 @@ export const useSorting = (
   const setSortModel = React.useCallback(
     (sortModel: SortModel) => {
       sortModelRef.current = sortModel;
-      apiRef.current.publishEvent(SORT_MODEL_CHANGE, getSortModelParams());
+      apiRef.current.instance.publishEvent(SORT_MODEL_CHANGE, getSortModelParams());
 
       if (options.sortingMode === FeatureModeConstant.client) {
         applySorting();
@@ -181,7 +181,7 @@ export const useSorting = (
   );
 
   const storeOriginalOrder = React.useCallback(() => {
-    originalOrder.current = apiRef.current.getRowModels().reduce((order, row) => {
+    originalOrder.current = apiRef.current.instance.getRowModels().reduce((order, row) => {
       order.push(row.id);
       return order;
     }, [] as RowId[]);
@@ -205,7 +205,7 @@ export const useSorting = (
 
   const onSortModelChange = React.useCallback(
     (handler: (param: SortModelParams) => void): (() => void) => {
-      return apiRef.current.subscribeEvent(SORT_MODEL_CHANGE, handler);
+      return apiRef.current.instance.subscribeEvent(SORT_MODEL_CHANGE, handler);
     },
     [apiRef],
   );
@@ -238,7 +238,7 @@ export const useSorting = (
 
   React.useEffect(() => {
     if (columnsProp.length > 0) {
-      const sortedColumns = apiRef.current
+      const sortedColumns = apiRef.current.instance
         .getAllColumns()
         .filter((column) => column.sortDirection != null)
         .sort((a, b) => a.sortIndex! - b.sortIndex!);

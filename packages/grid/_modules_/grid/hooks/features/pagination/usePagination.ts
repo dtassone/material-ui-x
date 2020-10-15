@@ -59,20 +59,20 @@ export const usePagination = (columns: InternalColumns, apiRef: ApiRef): Paginat
 
   const onPageChange = React.useCallback(
     (handler: (param: PageChangeParams) => void): (() => void) => {
-      return apiRef.current.subscribeEvent(PAGE_CHANGED, handler);
+      return apiRef.current.instance.subscribeEvent(PAGE_CHANGED, handler);
     },
     [apiRef],
   );
   const onPageSizeChange = React.useCallback(
     (handler: (param: PageChangeParams) => void): (() => void) => {
-      return apiRef.current.subscribeEvent(PAGESIZE_CHANGED, handler);
+      return apiRef.current.instance.subscribeEvent(PAGESIZE_CHANGED, handler);
     },
     [apiRef],
   );
 
   const resetAutopageSize = React.useCallback(() => {
     if (options.autoPageSize) {
-      const containerProps = apiRef?.current?.getContainerPropsState();
+      const containerProps = apiRef?.current?.instance.getContainerPropsState();
       const autoPagesize = containerProps?.viewportPageSize;
       if (autoPagesize) {
         logger.debug(`Setting autoPagesize to ${autoPagesize}`);
@@ -111,7 +111,7 @@ export const usePagination = (columns: InternalColumns, apiRef: ApiRef): Paginat
 
   React.useEffect(() => {
     if (apiRef.current?.isInitialised) {
-      apiRef.current.publishEvent(PAGE_CHANGED, gridState.pagination);
+      apiRef.current.instance.publishEvent(PAGE_CHANGED, gridState.pagination);
     }
   }, [apiRef, apiRef.current.isInitialised, gridState.pagination]);
 

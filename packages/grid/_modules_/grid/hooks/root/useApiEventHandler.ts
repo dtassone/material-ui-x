@@ -11,7 +11,7 @@ export function useApiEventHandler(
 
   React.useEffect(() => {
     if (handler && eventName) {
-      return apiRef.current.subscribeEvent(eventName, handler);
+      return apiRef.current.instance.subscribeEvent(eventName, handler);
     }
 
     return undefined;

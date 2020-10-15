@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { ElementSize } from '../elementSize';
 
 /**
  * The events API interface that is available in the grid [[apiRef]].
@@ -22,5 +23,5 @@ export interface EventsApi {
    * Trigger a resize of the component, and recalculation of width and height.
    * @param handler
    */
-  resize: () => void;
+  resize: (size: ElementSize) => void;
 }

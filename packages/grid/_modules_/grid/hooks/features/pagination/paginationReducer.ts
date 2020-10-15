@@ -67,7 +67,7 @@ export const setPageStateUpdate = (state: PaginationState, payload: any): Pagina
 
     if (state.page !== page) {
       const params: PageChangeParams = {...state, page};
-      apiRef.current.publishEvent(PAGE_CHANGED, params);
+      apiRef.current.instance.publishEvent(PAGE_CHANGED, params);
       return {...state, page};
     }
   }
@@ -93,7 +93,7 @@ export const setPageSizeStateUpdate = (state: PaginationState, payload: any): Pa
     pageCount: newPageCount,
     pageSize,
   };
-  apiRef.current.publishEvent(PAGESIZE_CHANGED, newState as PageChangeParams);
+  apiRef.current.instance.publishEvent(PAGESIZE_CHANGED, newState as PageChangeParams);
 
   newState = setPageStateUpdate(newState, { page: newPage, apiRef });
   return newState;
@@ -118,16 +118,15 @@ export const INITIAL_PAGINATION_STATE: PaginationState = {
 
 // REDUCER
 export const paginationReducer = (state: PaginationState, action: PaginationActions) => {
-  const apiState = action.payload.apiRef.current.state;
   switch (action.type) {
     case SET_PAGE_ACTION:
-      return setPageStateUpdate(apiState.pagination, action.payload);
+      return setPageStateUpdate(state, action.payload);
     case SET_PAGESIZE_ACTION:
-      return setPageSizeStateUpdate(apiState.pagination, action.payload);
+      return setPageSizeStateUpdate(state, action.payload);
     case SET_PAGINATION_MODE_ACTION:
-      return { ...apiState.pagination, ...{ paginationMode: action.payload!.paginationMode! } };
+      return { ...state, ...{ paginationMode: action.payload!.paginationMode! } };
     case SET_ROWCOUNT_ACTION:
-      return setRowCountStateUpdate(apiState.pagination, action.payload);
+      return setRowCountStateUpdate(state, action.payload);
     default:
       throw new Error(`Material-UI: Action not found - ${JSON.stringify(action)}`);
   }

@@ -42,7 +42,7 @@ export const useNativeEventListener = (
         bindedElem.removeEventListener(eventName, wrapHandler, options);
       };
 
-      apiRef.current.onUnmount(unsubscribe);
+      apiRef.current.instance.onUnmount(unsubscribe);
     }
   }, [ref, wrapHandler, eventName, added, logger, options, apiRef]);
 };

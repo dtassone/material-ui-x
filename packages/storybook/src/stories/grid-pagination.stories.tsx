@@ -80,11 +80,11 @@ export function PaginationApiTests() {
   const [autosize, setAutoSize] = React.useState(false);
 
   React.useEffect(() => {
-    return apiRef.current.onPageChange(action('pageChange'));
+    return apiRef.current.instance.onPageChange(action('pageChange'));
   }, [apiRef, data]);
 
   const backToFirstPage = () => {
-    apiRef.current.setPage(1);
+    apiRef.current.instance.setPage(1);
   };
   const [myPageSize, setPageSize] = React.useState(33);
   const changePageSizeWithOptionProp = () => {
@@ -94,7 +94,7 @@ export function PaginationApiTests() {
   };
   const changePageSizeWithApi = () => {
     setAutoSize(false);
-    apiRef.current.setPageSize(105);
+    apiRef.current.instance.setPageSize(105);
   };
   return (
     <React.Fragment>
@@ -198,7 +198,7 @@ export function ServerPaginationWithApi() {
   const [loading, setLoading] = React.useState<boolean>(false);
 
   React.useEffect(() => {
-    const unsubscribe = apiRef.current.onPageChange((params) => {
+    const unsubscribe = apiRef.current.instance.onPageChange((params) => {
       action('onPageChange')(params);
       setLoading(true);
       loadServerRows(params).then((newData) => {
@@ -296,7 +296,7 @@ export function Page2Api() {
   const apiRef = useApiRef();
 
   React.useEffect(() => {
-    apiRef.current.setPage(2);
+    apiRef.current.instance.setPage(2);
   }, [apiRef]);
 
   return (

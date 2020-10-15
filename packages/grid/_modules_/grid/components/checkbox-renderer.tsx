@@ -5,9 +5,9 @@ import { ColParams } from '../models/params/colParams';
 import { CellParams } from '../models/params/cellParams';
 
 export const HeaderCheckbox: React.FC<ColParams> = ({ api }) => {
-  const selectedRows = api.getSelectedRows();
-  const allRowsCount = api.getAllRowIds().length;
-  const isCurrentIndeterminate = selectedRows.length > 0 && selectedRows.length !== selectedRows;
+  const selectedRows = api.instance.getSelectedRows();
+  const allRowsCount = api.instance.getAllRowIds().length;
+  const isCurrentIndeterminate = selectedRows.length > 0 && selectedRows.length !== allRowsCount;
   const isCurrentChecked = selectedRows.length === allRowsCount || isCurrentIndeterminate;
 
   const [isChecked, setChecked] = React.useState(isCurrentChecked);
@@ -15,12 +15,12 @@ export const HeaderCheckbox: React.FC<ColParams> = ({ api }) => {
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>, checked: boolean) => {
     setChecked(checked);
-    api.selectRows(api.getAllRowIds(), checked);
+    api.instance.selectRows(api.instance.getAllRowIds(), checked);
   };
   const selectionChange = React.useCallback(
     (event: SelectionChangeParams) => {
       const isAllSelected =
-        api.getAllRowIds().length === event.rows.length && event.rows.length > 0;
+        api.instance.getAllRowIds().length === event.rows.length && event.rows.length > 0;
       const hasNoneSelected = event.rows.length === 0;
       setChecked(isAllSelected || !hasNoneSelected);
       setIndeterminate(!isAllSelected && !hasNoneSelected);
@@ -29,7 +29,7 @@ export const HeaderCheckbox: React.FC<ColParams> = ({ api }) => {
   );
 
   React.useEffect(() => {
-    return api.onSelectionChange(selectionChange);
+    return api.instance.onSelectionChange(selectionChange);
   }, [api, selectionChange]);
 
   return (
@@ -47,7 +47,7 @@ HeaderCheckbox.displayName = 'HeaderCheckbox';
 
 export const CellCheckboxRenderer: React.FC<CellParams> = React.memo(({ api, rowModel, value }) => {
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>, checked: boolean) => {
-    api.selectRow(rowModel.id, checked, true);
+    api.instance.selectRow(rowModel.id, checked, true);
   };
 
   return (

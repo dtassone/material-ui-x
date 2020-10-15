@@ -10,7 +10,7 @@ import { EventsApi } from './eventsApi';
 /**
  * The full grid API.
  */
-export type GridApi = CoreApi &
+export type GridInstanceApi = CoreApi &
   EventsApi &
   RowApi &
   ColumnApi &

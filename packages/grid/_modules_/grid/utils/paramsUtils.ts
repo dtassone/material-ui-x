@@ -1,6 +1,7 @@
+import { GridApi } from '../models/api/apiRef';
 import { RowModel, CellValue } from '../models/rows';
 import { ColDef } from '../models/colDef/colDef';
-import { GridApi } from '../models/api/gridApi';
+import { GridInstanceApi } from '../models/api/gridInstanceApi';
 import { CellParams } from '../models/params/cellParams';
 import { RowParams } from '../models/params/rowParams';
 
@@ -46,7 +47,7 @@ export function buildRowParams({
 }): RowParams {
   return {
     element,
-    columns: api.getAllColumns(),
+    columns: api.instance.getAllColumns(),
     getValue: (field: string) => rowModel.data[field],
     data: rowModel.data,
     rowModel,

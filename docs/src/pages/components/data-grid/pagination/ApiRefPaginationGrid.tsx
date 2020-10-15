@@ -11,7 +11,7 @@ export default function ApiRefPaginationGrid() {
   });
 
   React.useEffect(() => {
-    apiRef.current.setPage(2);
+    apiRef.current.instance.setPage(2);
   }, [apiRef]);
 
   return (

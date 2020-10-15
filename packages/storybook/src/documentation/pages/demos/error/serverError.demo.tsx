@@ -25,7 +25,7 @@ export default function ServerErrorDemo() {
     setLoading(true);
     loadServerRows().catch((err) => {
       setLoading(false);
-      apiRef.current.showError({ message: err.message });
+      apiRef.current.instance.showError({ message: err.message });
     });
   }, [apiRef, setLoading]);
 

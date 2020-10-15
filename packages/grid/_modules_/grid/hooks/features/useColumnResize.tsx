@@ -38,13 +38,13 @@ export const useColumnResize = (
   }, []);
 
   React.useEffect(() => {
-    return apiRef.current.subscribeEvent(SCROLLING, onScrollHandler);
+    return apiRef.current.instance.subscribeEvent(SCROLLING, onScrollHandler);
   }, [apiRef, onScrollHandler]);
 
   const handleMouseDown = React.useCallback(
     (col: ColDef): void => {
       logger.debug(`Start Resize on col ${col.field}`);
-      apiRef.current.publishEvent(COL_RESIZE_START);
+      apiRef.current.instance.publishEvent(COL_RESIZE_START);
       isResizing.current = true;
       currentColDefRef.current = col;
       currentColPreviousWidth.current = col.width;
@@ -57,9 +57,9 @@ export const useColumnResize = (
       dataContainerPreviousWidth.current = Number(
         dataContainerElemRef.current!.style.minWidth.replace('px', ''),
       );
-      currentColPosition.current = apiRef.current.getColumnPosition(col.field);
+      currentColPosition.current = apiRef.current.instance.getColumnPosition(col.field);
       isLastColumn.current =
-        apiRef.current.getColumnIndex(col.field) === apiRef.current.getVisibleColumns().length - 1;
+        apiRef.current.instance.getColumnIndex(col.field) === apiRef.current.instance.getVisibleColumns().length - 1;
     },
     [apiRef, columnsRef, logger],
   );
@@ -75,12 +75,12 @@ export const useColumnResize = (
       logger.debug(
         `Updating col ${currentColDefRef.current.field} with new width: ${currentColDefRef.current.width}`,
       );
-      apiRef?.current?.updateColumn(currentColDefRef.current);
+      apiRef?.current?.instance.updateColumn(currentColDefRef.current);
       currentColDefRef.current = undefined;
     }
 
     stopResizeEventTimeout.current = setTimeout(() => {
-      apiRef.current.publishEvent(COL_RESIZE_STOP);
+      apiRef.current.instance.publishEvent(COL_RESIZE_STOP);
     }, 200);
   }, [apiRef, logger]);
 
@@ -102,7 +102,7 @@ export const useColumnResize = (
         }px`;
 
         if (isLastColumn.current) {
-          apiRef.current.scroll({ left: dataContainerPreviousWidth.current! + diffWithPrev });
+          apiRef.current.instance.scroll({ left: dataContainerPreviousWidth.current! + diffWithPrev });
         }
       }
       if (currentColCellsElems.current) {

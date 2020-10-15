@@ -179,12 +179,12 @@ export const GridComponent = React.forwardRef<HTMLDivElement, GridComponentProps
                         !gridState.options.hideFooterPagination &&
                         (customComponents.paginationComponent || (
                           <Pagination
-                            setPage={apiRef.current.setPage}
+                            setPage={apiRef.current.instance.setPage}
                             currentPage={gridState.pagination.page}
                             pageCount={gridState.pagination.pageCount}
                             pageSize={gridState.pagination.pageSize}
                             rowCount={gridState.pagination.rowCount}
-                            setPageSize={apiRef.current.setPageSize}
+                            setPageSize={apiRef.current.instance.setPageSize}
                             rowsPerPageOptions={gridState.options.rowsPerPageOptions}
                           />
                         ))

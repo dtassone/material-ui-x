@@ -10,7 +10,7 @@ export function useApi(gridRootRef: React.RefObject<HTMLDivElement>, apiRef: Api
 
   const publishEvent = React.useCallback(
     (name: string, ...args: any[]) => {
-      apiRef.current.emit(name, ...args);
+      apiRef.current.instance.emit(name, ...args);
     },
     [apiRef],
   );
@@ -18,11 +18,11 @@ export function useApi(gridRootRef: React.RefObject<HTMLDivElement>, apiRef: Api
   const subscribeEvent = React.useCallback(
     (event: string, handler: (param: any) => void): (() => void) => {
       logger.debug(`Binding ${event} event`);
-      apiRef.current.on(event, handler);
+      apiRef.current.instance.on(event, handler);
       const api = apiRef.current;
       return () => {
         logger.debug(`Clearing ${event} event`);
-        api.removeListener(event, handler);
+        api.instance.removeListener(event, handler);
       };
     },
     [apiRef, logger],
@@ -38,16 +38,16 @@ export function useApi(gridRootRef: React.RefObject<HTMLDivElement>, apiRef: Api
   React.useEffect(() => {
     logger.debug('Initializing grid api.');
     apiRef.current.isInitialised = true;
-    apiRef.current.rootElementRef = gridRootRef;
+    apiRef.current.instance.rootElementRef = gridRootRef;
 
     setInit(true);
     const api = apiRef.current;
 
     return () => {
       logger.debug('Unmounting Grid component');
-      api.emit(UNMOUNT);
+      api.instance.emit(UNMOUNT);
       logger.debug('Clearing all events listeners');
-      api.removeAllListeners();
+      api.instance.removeAllListeners();
     };
   }, [gridRootRef, logger, apiRef]);
 

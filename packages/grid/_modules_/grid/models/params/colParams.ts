@@ -1,6 +1,5 @@
-/**
- * Object passed as parameter in the column [[ColDef]] header renderer.
- */
+import { GridApi } from '../api/apiRef';
+
 export interface ColParams {
   /**
    * The column field of the column that triggered the event
@@ -17,5 +16,6 @@ export interface ColParams {
   /**
    * API ref that let you manipulate the grid.
    */
-  api: any;
+  api: GridApi;
+
 }

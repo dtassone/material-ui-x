@@ -5,10 +5,8 @@ import { checkboxSelectionColDef } from '../../models/colDef/checkboxSelection';
 import { ColDef, Columns, ColumnsMeta, InternalColumns } from '../../models/colDef/colDef';
 import { ColumnTypesRecord } from '../../models/colDef/colTypeDef';
 import { getColDef } from '../../models/colDef/getColDef';
-import { GridOptions } from '../../models/gridOptions';
 import { SortModelParams } from '../../models/params/sortModelParams';
 import { isEqual } from '../../utils/utils';
-import { GridState } from '../features/core/gridState';
 import { useGridState } from '../features/core/useGridState';
 import { Logger, useLogger } from '../utils/useLogger';
 import { SORT_MODEL_CHANGE, COLUMNS_UPDATED } from '../../constants/eventsConstants';
@@ -46,8 +44,8 @@ function hydrateColumns(
     });
   }
   // we check if someone called setSortModel using apiref to apply icons
-  if (apiRef.current && apiRef.current.getSortModel) {
-    const sortModel = apiRef.current.getSortModel();
+  if (apiRef.current && apiRef.current.instance.getSortModel) {
+    const sortModel = apiRef.current.instance.getSortModel();
     sortModel.forEach((c, idx) => {
       const col = mappedCols.find((mc) => mc.field === c.field);
       if (col) {
@@ -149,7 +147,7 @@ export function useColumns(
       setGridState((oldState)=>  ({...oldState, columns: newState}));
 
       if (apiRef.current && emit) {
-        apiRef.current.publishEvent(COLUMNS_UPDATED, newState.all);
+        apiRef.current.instance.publishEvent(COLUMNS_UPDATED, newState.all);
       }
     },
     [logger, setGridState, apiRef],

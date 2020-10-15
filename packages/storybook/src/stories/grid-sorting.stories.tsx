@@ -266,7 +266,7 @@ export const SortModelOptionsMultiple = () => {
 export const ApiSingleSorted = () => {
   const apiRef = useApiRef();
   React.useEffect(() => {
-    apiRef.current.setSortModel([{ field: 'name', sort: 'asc' }]);
+    apiRef.current.instance.setSortModel([{ field: 'name', sort: 'asc' }]);
   }, [apiRef]);
 
   return (
@@ -278,7 +278,7 @@ export const ApiSingleSorted = () => {
 export const ApiMultipleSorted = () => {
   const apiRef = useApiRef();
   React.useEffect(() => {
-    apiRef.current.setSortModel([
+    apiRef.current.instance.setSortModel([
       { field: 'age', sort: 'desc' },
       { field: 'name', sort: 'asc' },
     ]);
@@ -303,9 +303,9 @@ export const SortedEventsApi = () => {
   }, []);
 
   React.useEffect(() => {
-    apiRef.current.onSortModelChange((params) => handleEvent('onSortModelChange', params));
+    apiRef.current.instance.onSortModelChange((params) => handleEvent('onSortModelChange', params));
 
-    apiRef.current.setSortModel([
+    apiRef.current.instance.setSortModel([
       { field: 'age', sort: 'desc' },
       { field: 'name', sort: 'asc' },
     ]);

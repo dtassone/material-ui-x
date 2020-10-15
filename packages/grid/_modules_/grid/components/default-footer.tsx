@@ -22,7 +22,7 @@ export const DefaultFooter = React.forwardRef<HTMLDivElement, DefaultFooterProps
     //TODO refactor to use gridState
     const [selectedRowCount, setSelectedCount] = React.useState(0);
     React.useEffect(() => {
-      return apiRef!.current.onSelectionChange(({ rows }) => {
+      return apiRef!.current.instance.onSelectionChange(({ rows }) => {
         setSelectedCount(rows.length);
       });
     }, [apiRef]);

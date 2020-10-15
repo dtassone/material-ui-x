@@ -92,7 +92,7 @@ export const useRowsReducer = (rows: RowsProp, apiRef: ApiRef): RowModel[] => {
         updateAllRows(newRows);
       }
 
-      apiRef.current.publishEvent(ROWS_UPDATED, Object.values<RowModel>(newRowsState.idRowsLookup));
+      apiRef.current.instance.publishEvent(ROWS_UPDATED, Object.values<RowModel>(newRowsState.idRowsLookup));
     },
     [logger, apiRef, dispatch, getRowIndexFromId, updateAllRows],
   );

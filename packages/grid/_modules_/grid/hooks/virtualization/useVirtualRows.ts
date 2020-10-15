@@ -109,7 +109,7 @@ export const useVirtualRows = (
       const rowProps: RenderRowProps = { page, firstRowIdx, lastRowIdx };
       return rowProps;
     },
-    [gridState.containerSizes, options.pagination, paginationState.pageSize, paginationState.page],
+    [gridState, options.pagination, paginationState.pageSize, paginationState.page],
   );
 
   const getRenderingState = React.useCallback((): Partial<RenderContextProps> | null => {
@@ -124,7 +124,7 @@ export const useVirtualRows = (
       pageSize: paginationState.pageSize,
     };
     return newRenderCtx;
-  }, [renderedColRef, getRenderRowProps, gridState.rendering, gridState.containerSizes, paginationState.page, paginationState.pageSize]);
+  }, [gridState.containerSizes, gridState.rendering.virtualPage, renderedColRef, getRenderRowProps, paginationState.page, paginationState.pageSize]);
 
   const reRender = React.useCallback(() => {
     const renderingState = getRenderingState();
@@ -166,7 +166,7 @@ export const useVirtualRows = (
         requireRerender = true;
       } else {
         scrollTo(scrollParams);
-        apiRef.current.publishEvent(SCROLLING, scrollParams);
+        apiRef.current.instance.publishEvent(SCROLLING, scrollParams);
       }
       setRenderingState({renderingZoneScroll: scrollParams});
 
@@ -175,7 +175,7 @@ export const useVirtualRows = (
         reRender();
       }
     }
-  }, [apiRef, gridState.containerSizes, gridState.rendering.renderContext, gridState.rendering.virtualPage, logger, paginationState.page, reRender, scrollTo, setRenderingState, updateRenderedCols, windowRef]);
+  }, [apiRef, gridState.containerSizes, gridState.rendering, logger, paginationState.page, reRender, scrollTo, setRenderingState, updateRenderedCols, windowRef]);
 
   useEnhancedEffect(() => {
     if (renderingZoneRef && renderingZoneRef.current) {
@@ -206,17 +206,17 @@ React.useEffect(()=> {
     (event: any) => {
       setRenderingState({realScroll: { left: event.target.scrollLeft, top: event.target.scrollTop }})
       if (scrollingTimeout.current === 0) {
-        apiRef.current.state.isScrolling = true;
+        setGridState((state)=> ({...state, isScrolling: true}));
       }
       clearTimeout(scrollingTimeout.current);
       scrollingTimeout.current = setTimeout(() => {
         scrollingTimeout.current = 0;
-        apiRef.current.state.isScrolling = false;
+        setGridState((state)=> ({...state, isScrolling: false}));
       }, 300);
 
       updateViewport();
     },
-    [setRenderingState, updateViewport, apiRef],
+    [setRenderingState, updateViewport, setGridState],
   );
 
   const scrollToIndexes = React.useCallback(
@@ -224,14 +224,14 @@ React.useEffect(()=> {
       logger.debug(`Scrolling to cell at row ${params.rowIndex}, col: ${params.colIndex} `);
 
       let scrollLeft;
-      const isColVisible = apiRef.current.isColumnVisibleInWindow(params.colIndex);
+      const isColVisible = apiRef.current.instance.isColumnVisibleInWindow(params.colIndex);
       logger.debug(`Column ${params.colIndex} is ${isColVisible ? 'already' : 'not'} visible.`);
       if (!isColVisible) {
-        const meta = apiRef.current.getColumnsMeta();
+        const meta = apiRef.current.instance.getColumnsMeta();
         const isLastCol = params.colIndex + 1 === meta.positions.length;
 
         if (isLastCol) {
-          const lastColWidth = apiRef.current.getVisibleColumns()[params.colIndex].width!;
+          const lastColWidth = apiRef.current.instance.getVisibleColumns()[params.colIndex].width!;
           scrollLeft =
             meta.positions[params.colIndex] +
             lastColWidth -
@@ -268,7 +268,7 @@ React.useEffect(()=> {
         logger.debug(`Row is below, setting scrollTop to ${scrollTop}`);
       }
 
-      apiRef.current.scroll({
+      apiRef.current.instance.scroll({
         left: scrollLeft,
         top: scrollTop,
       });
@@ -335,8 +335,6 @@ React.useEffect(()=> {
   };
 
   useApiMethod(apiRef, virtualApi, 'VirtualizationApi');
-
-  //Not sure as it should look at containerSizes and update the viewport
   useApiEventHandler(apiRef, RESIZE, updateViewport);
 
   return gridState.rendering.renderContext;

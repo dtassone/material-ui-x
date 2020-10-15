@@ -229,7 +229,7 @@ describe('<XGrid />', () => {
       const GridTest = () => {
         const apiRef = useApiRef();
         React.useEffect(() => {
-          apiRef.current.setPage(2);
+          apiRef.current.instance.setPage(2);
         });
         return (
           <div style={{ width: 300, height: 300 }}>

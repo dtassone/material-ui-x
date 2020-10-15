@@ -1,3 +1,4 @@
+import { GridApi } from '../api/apiRef';
 import { CellValue, RowData, RowModel } from '../rows';
 
 /**
@@ -40,7 +41,7 @@ export interface CellParams {
   /**
    * ApiRef that let you manipulate the grid.
    */
-  api: any;
+  api: GridApi;
 }
 
 /**
