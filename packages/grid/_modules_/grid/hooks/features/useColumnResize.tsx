@@ -3,8 +3,10 @@ import { ColDef } from '../../models/colDef';
 import { ScrollParams, useLogger } from '../utils';
 import { COL_RESIZE_START, COL_RESIZE_STOP, SCROLLING } from '../../constants/eventsConstants';
 import { findCellElementsFromCol, findDataContainerFromCurrent } from '../../utils';
+import { optionsSelector } from '../utils/useOptionsProp';
 import { useStateRef } from '../utils/useStateRef';
 import { ApiRef } from '../../models';
+import { useGridSelector } from './core/useGridSelector';
 
 const MIN_COL_WIDTH = 50;
 const MOUSE_LEFT_TIMEOUT = 1000;
@@ -13,10 +15,9 @@ const MOUSE_LEFT_TIMEOUT = 1000;
 export const useColumnResize = (
   columnsRef: React.RefObject<HTMLDivElement>,
   apiRef: ApiRef,
-  headerHeight: number,
 ) => {
   const logger = useLogger('useColumnResize');
-
+  const options = useGridSelector(apiRef, optionsSelector);
   const isResizing = React.useRef<boolean>(false);
   const isLastColumn = React.useRef<boolean>(false);
   const mouseLeftTimeout = React.useRef<any>();
@@ -127,7 +128,7 @@ export const useColumnResize = (
       isLastColumn.current &&
       resizingMouseMove.current &&
       resizingMouseMove.current.y >= 0 &&
-      resizingMouseMove.current.y <= headerHeight &&
+      resizingMouseMove.current.y <= options.headerHeight &&
       currentColDefRef.current
     ) {
       logger.debug(`Mouse left and same row, so extending last column width of 100`);
@@ -142,7 +143,7 @@ export const useColumnResize = (
         stopResize();
       }, MOUSE_LEFT_TIMEOUT);
     }
-  }, [headerHeight, logger, stopResize, updateWidth]);
+  }, [options.headerHeight, logger, stopResize, updateWidth]);
 
   const handleMouseMove = React.useCallback(
     (ev: MouseEvent): void => {
