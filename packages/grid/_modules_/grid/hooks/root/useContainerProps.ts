@@ -3,6 +3,7 @@ import * as React from 'react';
 import { RESIZE } from '../../constants/eventsConstants';
 import { ApiRef, ContainerProps, ElementSize, GridOptions } from '../../models';
 import { isEqual } from '../../utils/utils';
+import { GridState } from '../features/core/gridState';
 import { useGridSelector } from '../features/core/useGridSelector';
 import { useGridState } from '../features/core/useGridState';
 import { PaginationState } from '../features/pagination/paginationReducer';
@@ -13,15 +14,30 @@ import { optionsSelector } from '../utils/useOptionsProp';
 import { columnsTotalWidthSelector } from './columns/columnsSelector';
 import { useApiEventHandler } from './useApiEventHandler';
 
-export const useContainerProps = (windowRef: React.RefObject<HTMLDivElement>, apiRef: ApiRef) => {
+const rootContainerSizeSelector  = (state: GridState)=> state.rootContainerSize;
+
+export const useContainerProps = (windowRef: React.RefObject<HTMLDivElement>, footerRef: React.RefObject<HTMLDivElement>, apiRef: ApiRef) => {
   const logger = useLogger('useContainerProps');
-  const [gridState, setGridState] = useGridState(apiRef);
+  const [gridState, setGridState, forceUpdate] = useGridState(apiRef);
   const windowSizesRef = React.useRef<ElementSize>({width: 0, height: 0});
 
   const options = useGridSelector(apiRef, optionsSelector);
   const columnsTotalWidth = useGridSelector(apiRef, columnsTotalWidthSelector);
   const totalRowsCount = useGridSelector(apiRef, rowCountSelector);
   const paginationState = useGridSelector<PaginationState>(apiRef, paginationSelector);
+
+  const getGridRootHeight = React.useCallback((dataContainerHeight: number)=> {
+    if (!options.autoHeight) {
+      return apiRef.current.state.rootContainerSize.height;
+    }
+    const footerHeight = (footerRef.current && footerRef.current.getBoundingClientRect().height) || 0;
+    let dataHeight = dataContainerHeight;
+    if (dataHeight < options.rowHeight) {
+      dataHeight = options.rowHeight * 2; // If we have no rows, we give the size of 2 rows to display the no rows overlay
+    }
+
+    return footerHeight + dataHeight + options.headerHeight;
+  },[options.autoHeight, options.rowHeight, options.headerHeight, footerRef, apiRef]);
 
   const getVirtualRowCount = React.useCallback(() => {
     const currentPage = paginationState.page;
@@ -116,26 +132,33 @@ export const useContainerProps = (windowRef: React.RefObject<HTMLDivElement>, ap
         windowSizes: windowSizesRef.current,
         viewportSize,
         lastPage: viewportMaxPage,
+        gridRootSize: {height: getGridRootHeight(totalHeight), width: apiRef.current.state.rootContainerSize.width}
       };
 
       logger.debug('returning container props', indexes);
       return indexes;
     },
-    [windowRef, logger, getVirtualRowCount, options.rowHeight, options.autoPageSize, options.autoHeight, options.scrollbarSize, options.pagination, columnsTotalWidth],
+    [windowRef, columnsTotalWidth, logger, getVirtualRowCount, options.rowHeight, options.autoPageSize, options.autoHeight, options.scrollbarSize, options.pagination, getGridRootHeight, gridState.rootContainerSize],
   );
 
   const updateContainerState = React.useCallback((containerState: ContainerProps | null) => {
+    let updated = false;
     setGridState((state) => {
       if (!isEqual(state.containerSizes, containerState)) {
         state.containerSizes = containerState;
+        updated = true;
       }
       return state;
     });
+    return updated;
   }, [setGridState])
 
   const refreshContainerSizes = React.useCallback(() => {
     const containerProps = getContainerProps();
-    updateContainerState(containerProps);
+    const updated = updateContainerState(containerProps);
+    if(updated) {
+      forceUpdate();
+    }
   }, [getContainerProps, updateContainerState])
 
   useEffect(()=> {

@@ -72,7 +72,7 @@ export const GridComponent = React.forwardRef<HTMLDivElement, GridComponentProps
     useSelection(internalOptions, props.rows, initialised, apiRef);
     useSorting(internalOptions, props.rows, props.columns, apiRef);
 
-    useContainerProps(windowRef, apiRef);
+    useContainerProps(windowRef, footerRef, apiRef);
     const renderCtx = useVirtualRows(
       columnsHeaderRef,
       windowRef,
@@ -80,8 +80,8 @@ export const GridComponent = React.forwardRef<HTMLDivElement, GridComponentProps
       apiRef,
     );
 
-    const onResizeColumn = useColumnResize(columnsHeaderRef, apiRef, internalOptions.headerHeight);
-    const paginationProps = usePagination(internalColumns, apiRef);
+    const onResizeColumn = useColumnResize(columnsHeaderRef, apiRef);
+    const paginationProps = usePagination(apiRef);
 
     const customComponents = useComponents(
       internalColumns,
@@ -98,19 +98,30 @@ export const GridComponent = React.forwardRef<HTMLDivElement, GridComponentProps
       renderCtx,
     );
 
-    // TODO move that to renderCtx
-    const getTotalHeight = React.useCallback(
-      (size) => getCurryTotalHeight(internalOptions, gridState.containerSizes, footerRef)(size),
-      [internalOptions, gridState.containerSizes],
+    // // TODO move that to renderCtx
+    // const getTotalHeight = React.useCallback(
+    //   (size) => getCurryTotalHeight(internalOptions, gridState.containerSizes, footerRef)(size),
+    //   [internalOptions, gridState.containerSizes],
+    // );
+    gridLogger.info(
+      `gridState =====>`,
+      gridState,
     );
-
+    gridLogger.info(
+      `Grid root size height =====>`,
+      gridState.containerSizes?.gridRootSize.height,
+    );
+    gridLogger.info(
+      `rootContainerSize height =====>`,
+      gridState.rootContainerSize.height,
+    );
     return (
       <AutoSizer onResize={onResize}>
-        {(size: any) => (
+        {( ) => (
           <GridRoot
             ref={handleRef}
             className={props.className}
-            style={{ width: size.width, height: getTotalHeight(size) }}
+            style={{ width: gridState.containerSizes?.gridRootSize.width, height: gridState.containerSizes?.gridRootSize.height }}
             role="grid"
             aria-colcount={internalColumns.visible.length}
             aria-rowcount={internalRows.length + 1}

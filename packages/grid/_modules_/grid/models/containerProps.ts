@@ -52,4 +52,6 @@ export interface ContainerProps {
    * The total Element size required to render the full set of rows minus the scrollbars.
    */
   dataContainerSizes: ElementSize;
+
+  gridRootSize: ElementSize;
 }

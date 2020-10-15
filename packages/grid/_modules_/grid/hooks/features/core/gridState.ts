@@ -1,5 +1,6 @@
 import { InternalColumns } from '../../../models/colDef/colDef';
 import { ContainerProps } from '../../../models/containerProps';
+import { ElementSize } from '../../../models/elementSize';
 import { DEFAULT_GRID_OPTIONS, GridOptions } from '../../../models/gridOptions';
 import { RowId } from '../../../models/rows';
 import { getInitialColumnsState } from '../../root/useColumns';
@@ -45,7 +46,8 @@ export type GridState = RowsState &
   ScrollingState &
   ColumnState &
   RenderingState &
-  {containerSizes: ContainerProps | null}
+  {containerSizes: ContainerProps | null}&
+  {rootContainerSize: ElementSize}
 ;
 
 export const getInitialState: () => GridState = () => ({
@@ -57,5 +59,6 @@ export const getInitialState: () => GridState = () => ({
   isScrolling: false,
   columns: getInitialColumnsState(),
   rendering: getInitialRenderingState(),
-  containerSizes: null
+  containerSizes: null,
+  rootContainerSize: {height: 0, width: 0}
 });
