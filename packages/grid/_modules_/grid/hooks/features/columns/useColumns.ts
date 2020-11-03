@@ -14,6 +14,7 @@ import { ColumnTypesRecord } from '../../../models/colDef/colTypeDef';
 import { getColDef } from '../../../models/colDef/getColDef';
 import { useApiMethod } from '../../root/useApiMethod';
 import { Logger, useLogger } from '../../utils/useLogger';
+import { GridState } from '../core/gridState';
 import { useGridState } from '../core/useGridState';
 
 function hydrateColumns(
@@ -147,25 +148,39 @@ export function useColumns(columns: Columns, apiRef: ApiRef): InternalColumns {
   ]);
 
   const getColumnFromField: (field: string) => ColDef = React.useCallback(
-    (field) => gridState.columns.lookup[field],
-    [gridState.columns],
+    (field) => apiRef.current.getState<GridState>().columns.lookup[field],
+    [apiRef],
   );
-  const getAllColumns: () => Columns = () => gridState.columns.all;
-  const getColumnsMeta: () => ColumnsMeta = () => gridState.columns.meta;
-  const getColumnIndex: (field: string, useVisibleColumns?: boolean) => number = (
-    field,
-    useVisibleColumns = true,
-  ) =>
-    useVisibleColumns
-      ? gridState.columns.visible.findIndex((col) => col.field === field)
-      : gridState.columns.all.findIndex((col) => col.field === field);
+  const getAllColumns: () => Columns = React.useCallback(
+    () => apiRef.current.getState<GridState>().columns.all,
+    [apiRef],
+  );
+  const getColumnsMeta: () => ColumnsMeta = React.useCallback(
+    () => apiRef.current.getState<GridState>().columns.meta,
+    [apiRef],
+  );
+  const getColumnIndex: (field: string, useVisibleColumns?: boolean) => number = React.useCallback(
+    (field, useVisibleColumns = true) =>
+      useVisibleColumns
+        ? apiRef.current
+            .getState<GridState>()
+            .columns.visible.findIndex((col) => col.field === field)
+        : apiRef.current.getState<GridState>().columns.all.findIndex((col) => col.field === field),
+    [apiRef],
+  );
 
-  const getColumnPosition: (field: string) => number = (field) => {
-    const index = getColumnIndex(field);
-    return gridState.columns.meta.positions[index];
-  };
+  const getColumnPosition: (field: string) => number = React.useCallback(
+    (field) => {
+      const index = getColumnIndex(field);
+      return apiRef.current.getState<GridState>().columns.meta.positions[index];
+    },
+    [apiRef, getColumnIndex],
+  );
 
-  const getVisibleColumns: () => Columns = () => gridState.columns.visible;
+  const getVisibleColumns: () => Columns = React.useCallback(
+    () => apiRef.current.getState<GridState>().columns.visible,
+    [apiRef],
+  );
 
   const updateColumns = React.useCallback(
     (cols: ColDef[], resetColumnState = false) => {
