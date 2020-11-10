@@ -8,7 +8,7 @@ import { classnames } from '../utils';
 import { ColumnHeaderSortIcon } from './column-header-sort-icon';
 import { ColumnHeaderTitle } from './column-header-title';
 import { ColumnHeaderSeparator } from './column-header-separator';
-import { ColumnHeaderFilterIcon } from './column-header-filter-icon';
+import { ColumnHeaderMenuIcon } from './column-header-menu-icon';
 
 interface ColumnHeaderItemProps {
   colIndex: number;
@@ -111,7 +111,7 @@ export const ColumnHeaderItem = ({
       {...ariaSort}
     >
       <div className="MuiDataGrid-colCell-draggable" {...dragConfig}>
-        {!disableColumnFilter && isColumnNumeric && <ColumnHeaderFilterIcon column={column} />}
+        {!disableColumnFilter && isColumnNumeric && <ColumnHeaderMenuIcon column={column} />}
 
         <div className={'MuiDataGrid-colCellTitleContainer'}>
           {isColumnNumeric && (
@@ -136,7 +136,7 @@ export const ColumnHeaderItem = ({
             />
           )}
         </div>
-        {!isColumnNumeric && !disableColumnFilter && <ColumnHeaderFilterIcon column={column} />}
+        {!isColumnNumeric && !disableColumnFilter && <ColumnHeaderMenuIcon column={column} />}
       </div>
       <ColumnHeaderSeparator
         resizable={!disableColumnResize && !!column.resizable}
