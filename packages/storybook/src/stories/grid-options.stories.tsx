@@ -108,3 +108,14 @@ export const AutoHeightLarge = () => {
     </div>
   );
 };
+export const AutoHeightWithContent = () => {
+  const data = useData(10, 20);
+  return (
+    <React.Fragment>
+      <div className="grid-container">
+        <XGrid rows={data.rows} columns={data.columns} autoHeight hideToolbar />
+      </div>
+      <p style={{ background: 'red' }}> this is another piece of text</p>
+    </React.Fragment>
+  );
+};
